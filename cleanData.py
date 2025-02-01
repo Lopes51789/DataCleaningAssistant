@@ -66,12 +66,21 @@ class DataFrame:
                 self.df[col] = labelencoder.fit_transform(self.df[col])
 
         return labelencoder
+    
+    def fill_missing_values(self):
+        
+        self.df.fillna(method="ffill", inplace=True)
+        self.df.fillna(method="bfill", inplace=True)
+        return self
+    
+
 
 def test():
-    filepath2 = "testjson\\banksdata.json"
+    filepath2 = "testcsv\\tb_lobby_stats_player.csv"
     df2 = DataFrame(filepath2)
     df2.categorical_to_numeric()
-    
+    print(df2.get_correlation())
+
 
 
 if __name__ == "__main__":
