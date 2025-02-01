@@ -58,17 +58,21 @@ class DataFrame:
     
     def get_features_datatypes(self):
         return self.df.dtypes
+    
+    def categorical_to_numeric(self):
+        labelencoder = LabelEncoder()
+        for col in self.df.columns:
+            if self.df[col].dtype == 'object':
+                self.df[col] = labelencoder.fit_transform(self.df[col])
+
+        return labelencoder
 
 def test():
     filepath2 = "testjson\\banksdata.json"
     df2 = DataFrame(filepath2)
-    print(df2.get_duplicates())
-    print(df2.get_amount_duplicates())
-    print(df2.get_which_missing_values())
-    print(df2.get_amount_missing_values())
-    print(df2.get_stats())
-    print(df2.get_info())
-    print(df2.get_features_datatypes())
+    df2.categorical_to_numeric()
+    
+
 
 if __name__ == "__main__":
     test()
