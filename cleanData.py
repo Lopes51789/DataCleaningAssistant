@@ -180,8 +180,7 @@ class DataFrame:
 
 def test():
     filepath2 = "testcsv\\tb_lobby_stats_player.csv"
-    filepath3 = "testjson\\banksdata.json"
-    df2 = DataFrame(filepath3)
+    df2 = DataFrame(filepath2)
     df2.removeDuplicates()
 
     for col in df2.get_columns_missing_values():
