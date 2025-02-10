@@ -113,7 +113,7 @@ class DataFrame:
         return self.df.info()
     
     def get_data_report(self):
-        return self.get_info(), self.get_stats(), self.get_missing_value(), self.get_amount_missing_values(), self.get_duplicates(), self.get_amount_duplicates()
+        return self.get_info(), self.get_missing_value(), self.get_amount_missing_values(), self.get_duplicates(), self.get_amount_duplicates()
 
     def get_correlation(self):
         return self.df.corr()
@@ -122,35 +122,76 @@ class DataFrame:
         return self.df.dtypes
     
     def categorical_to_numeric(self):
-        labelencoder = LabelEncoder()
-        onehotencoder = OneHotEncoder()
-
+        categorical_dict = {}
         for col in self.df.columns:
+            labelencoder = LabelEncoder()
+            onehotencoder = OneHotEncoder()
             if self.df[col].dtype == 'object':
+                #storing the mapping
+                unique_values = self.df[col].unique()
+                encoded_values = labelencoder.fit_transform(unique_values)
+                integer_values = [int(label) for label in encoded_values]
+                categorical_dict[col] = dict(zip(unique_values, integer_values))
+
+                #transform categorical features into inetegers using label encoding
                 self.df[col] = labelencoder.fit_transform(self.df[col])
+
             elif self.df[col].dtype == 'bool':
+                #storing the mapping
+                unique_values = self.df[col].unique()
+                encoded_values = onehotencoder.fit_transform(unique_values.reshape(-1, 1))
+                categorical_dict[col] = dict(zip(unique_values, encoded_values.astype(int)))
+
+                #transform categorical features into inetegers using label encoding
                 self.df[col] = onehotencoder.fit_transform(self.df[col])
 
-        return [labelencoder, onehotencoder]
+        with open("categoricalFeaturesConversion.json", "w") as f:
+            json.dump(categorical_dict, f, indent=4)
+
+        return categorical_dict
     
     def fill_column_missing_values(self, column, method="mean"):
-        if method == "mean":
+        if self.df[column].dtype == 'object':
+            pass
+
+        if method == "mean" and self.df[column].dtype != 'object':
             self.df[column] = self.df[column].fillna(self.df[column].mean())
-        elif method == "median":
+        elif method == "median" and self.df[column].dtype != 'object':
             self.df[column] = self.df[column].fillna(self.df[column].median())
-        elif method == "delete":
-            self.df[column] = self.df[column].dropna()
-        
+
+    def removeDuplicates(self):
+        self.df.drop_duplicates(inplace=True)
+
+    def removeNaN(self):
+        self.df.dropna(inplace=True)
     
+    def getSample(self):
+        return self.df.sample()
+
+    def getHead(self, n = 5):
+        return self.df.head(n)
+
+    def toCsv(self, filename):
+        return self.df.to_csv(filename)
+    
+    def to_Xlsx(self, filename):
+        return self.df.to_excel(filename)
 
 
 def test():
     filepath2 = "testcsv\\tb_lobby_stats_player.csv"
-    df2 = DataFrame(filepath2)
-    df2.categorical_to_numeric()
+    filepath3 = "testjson\\banksdata.json"
+    df2 = DataFrame(filepath3)
+    df2.removeDuplicates()
+
     for col in df2.get_columns_missing_values():
         df2.fill_column_missing_values(col, method="median")
-    print(df2.get_general_stats())
+
+    df2.categorical_to_numeric()
+    df2.get_data_report()
+    
+    #df2.to_Xlsx("test.xlsx")
+
 
     
 
