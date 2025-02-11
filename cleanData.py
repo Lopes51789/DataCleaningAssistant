@@ -122,6 +122,22 @@ class DataFrame:
         return self.df.dtypes
     
     def removeFormatting(self):
+        """
+        Remove formatting from the DataFrame columns.
+
+        This function will:
+
+        - Convert all string values to lower case
+        - Remove all spaces from string values
+        - If the column contains no letters, convert it to a float and remove all commas (assuming it is a number)
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        None
+        """
         for col in self.df.columns:                
             if self.df[col].dtype == 'object':
                 self.df[col] = self.df[col].str.lower()
@@ -133,6 +149,22 @@ class DataFrame:
             
     
     def categorical_to_numeric(self):
+        """Converts categorical and boolean columns in the DataFrame to numeric values using encoding.
+
+        This function identifies columns with 'object' or 'bool' data types and applies:
+        - Label Encoding for categorical columns, replacing categories with integer labels.
+        - One-Hot Encoding for boolean columns, converting them into binary integer arrays.
+        
+        The mappings of original values to numeric representations are stored in a dictionary
+        and saved as a JSON file named 'categoricalFeaturesConversion.json'.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the mappings of original categorical and boolean values
+            to their respective encoded numeric values for each column."""
+
+
         categorical_dict = {}
         for col in self.df.columns:
             labelencoder = LabelEncoder()
@@ -162,6 +194,23 @@ class DataFrame:
         return categorical_dict
     
     def fill_column_missing_values(self, column, method="mean"):
+        """
+        Fills missing values in a specified column using a selected method.
+
+        Parameters
+        ----------
+        column : str
+            The name of the column in which missing values are to be filled.
+        method : str, optional
+            The method to use for filling missing values ('mean' or 'median').
+            The default is 'mean'.
+
+        Notes
+        -----
+        This function only fills missing values for columns with numeric data types.
+        If the column is of object type, no action is taken.
+        """
+
         if self.df[column].dtype == 'object':
             pass
 
@@ -200,13 +249,6 @@ def test():
 
     df2.categorical_to_numeric()
     df2.get_data_report()
-    
-    
-
-
-    
-
-
 
 if __name__ == "__main__":
     test()
