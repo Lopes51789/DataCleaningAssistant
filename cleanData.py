@@ -121,6 +121,17 @@ class DataFrame:
     def get_features_datatypes(self):
         return self.df.dtypes
     
+    def removeFormatting(self):
+        for col in self.df.columns:                
+            if self.df[col].dtype == 'object':
+                self.df[col] = self.df[col].str.lower()
+                self.df[col] = self.df[col].str.replace(" ", "")
+                
+                if not self.df[col].str.contains('[a-zA-Z]').any():
+                    self.df[col] = self.df[col].str.replace(',', '').astype(float)
+
+            
+    
     def categorical_to_numeric(self):
         categorical_dict = {}
         for col in self.df.columns:
@@ -180,16 +191,17 @@ class DataFrame:
 
 def test():
     filepath2 = "testcsv\\tb_lobby_stats_player.csv"
-    df2 = DataFrame(filepath2)
+    filepath3 = "testjson\\banksdata.json"
+    df2 = DataFrame(filepath3)
+    df2.removeFormatting()
     df2.removeDuplicates()
-
     for col in df2.get_columns_missing_values():
         df2.fill_column_missing_values(col, method="median")
 
     df2.categorical_to_numeric()
     df2.get_data_report()
     
-    #df2.to_Xlsx("test.xlsx")
+    
 
 
     
