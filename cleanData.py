@@ -270,39 +270,24 @@ class DataFrame:
     def check_df_size(self, population = 100, confidence_level=0.95, margin_of_error=0.05) -> bool:
         return self.generate_sample_size(population, confidence_level, margin_of_error) < self.df.shape[0]
     
-    def validate_data(self) -> bool:
-        """- Types of data validation
-        Data type - Check that the data matches the data type defined for a field.
-
-        Data range - Check that the data falls within an acceptable range of values defined for the field.
-
-        Data constraints -  Check that the data meets certain conditions or criteria for a field
-
-        Data consistency -  Check that the data meets certain conditions or criteria for a field
-
-        Data Structure - Check that the data follows or conforms to a set structure
-
-        Code validation - Check that the application code systematically performs any of the previously mentioned validations during user data input."""
-        
-        #Datatype
+    def detect_outliers(self):
+        outliers = {}
         for col in self.df.columns:
-            if self.df[col].dtype == 'object':
-                self.df[col] = self.df[col].astype(str)
-            
-            elif self.df[col].dtype == 'bool':
-                self.df[col] = self.df[col].astype(int)
-
-        #Data range
-
-        #Data constraints
-
-        #Data consistency
-
-        #Data Structure
+            if self.df[col].dtype in ['int64', 'int32', 'float64', 'float32']:
+                mean = np.mean(self.df[col])
+                std = np.std(self.df[col])
+                z_scores = np.abs((self.df[col] - mean) / std)
+                outlier_rows = self.df[(z_scores > 3)].index
+                for row in outlier_rows:
+                    outliers[str(row)] = [(col, int(self.df.loc[row, col]))]
 
 
-        return True
-    
+        with open("outliersDetection.json", "w") as f:
+            json.dump(outliers, f, indent=4)
+
+        return outliers
+                
+
     def getSample(self):
         return self.df.sample()
 
@@ -321,16 +306,19 @@ def test():
     filepath3 = "testjson\\banksdata.json"
 
     df2 = DataFrame(filepath2)
-    df2.get_data_report()
+    #df2.get_data_report()
     df2.removeFormatting()
     df2.removeDuplicates()
     for col in df2.get_columns_missing_values():
         df2.fill_column_missing_values(col, method="median")
-
     df2.categorical_to_numeric()
-    df2.get_data_report()
+    df2.detect_outliers()
 
-    print(df2.get_correlation())
+
+    df2.toCsv(f"cleanDF.csv")
+    #df2.get_data_report()
+
+    #print(df2.get_correlation())
 
 if __name__ == "__main__":
     test()

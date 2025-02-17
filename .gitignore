@@ -8,8 +8,10 @@ __pycache__/
 
 #Misc
 categoricalFeaturesConversion.json
+outliersDetection.json
 *.xlsx
 correlation.csv
+cleanDF.csv
 
 # Data Files
 testcsv/
