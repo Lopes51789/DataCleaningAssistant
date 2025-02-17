@@ -6,7 +6,7 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression, LinearRegression
-
+import math
 
 class DataFrame:
     def __init__(self, filepath: str = None, df: pd.DataFrame = None):
@@ -213,7 +213,6 @@ class DataFrame:
 
         if self.df[column].dtype == 'object':
             pass
-
         if method == "mean" and self.df[column].dtype != 'object':
             self.df[column] = self.df[column].fillna(self.df[column].mean())
         elif method == "median" and self.df[column].dtype != 'object':
@@ -224,6 +223,70 @@ class DataFrame:
 
     def removeNaN(self):
         self.df.dropna(inplace=True)
+
+    
+    def generate_sample_size(self, population = 100, confidence_level=0.95, margin_of_error=0.05) -> int:
+        """
+        Calculates the ideal sample size based on Simple Random Sampling.
+        
+        Parameters
+        ----------
+        population : float, optional
+            proportion of the population with the characteristic of interest. The default is 100.
+        confidence_level : float, optional
+            The desired confidence level. The default is 0.95.
+        margin_of_error : float, optional
+            The desired margin of error. The default is 0.05.
+        
+        Returns
+        -------
+        int
+            The ideal sample size.
+        """
+        confidence_level =  1-(1-confidence_level)/2
+        with open("randomSample.json", "r") as f:
+            data = json.load(f)
+        
+        temp_confidence_level = data["values"][str(confidence_level)]
+        equation = (((temp_confidence_level**2) * 0.5 * (1-0.5))/(margin_of_error**2))/(1+((temp_confidence_level**2 * 0.5 *(1-0.5)))/(margin_of_error**2*population))
+        
+        return math.ceil(equation)
+        
+    def check_df_size(self, population = 100, confidence_level=0.95, margin_of_error=0.05) -> bool:
+        return self.generate_sample_size(population, confidence_level, margin_of_error) < self.df.shape[0]
+    
+    def validate_data(self) -> bool:
+        """- Types of data validation
+        Data type - Check that the data matches the data type defined for a field.
+
+        Data range - Check that the data falls within an acceptable range of values defined for the field.
+
+        Data constraints -  Check that the data meets certain conditions or criteria for a field
+
+        Data consistency -  Check that the data meets certain conditions or criteria for a field
+
+        Data Structure - Check that the data follows or conforms to a set structure
+
+        Code validation - Check that the application code systematically performs any of the previously mentioned validations during user data input."""
+        
+        #Datatype
+        for col in self.df.columns:
+            if self.df[col].dtype == 'object':
+                self.df[col] = self.df[col].astype(str)
+            
+            elif self.df[col].dtype == 'bool':
+                self.df[col] = self.df[col].astype(int)
+
+        #Data range
+
+        #Data constraints
+
+        #Data consistency
+
+        #Data Structure
+
+
+        return True
     
     def getSample(self):
         return self.df.sample()
@@ -241,14 +304,18 @@ class DataFrame:
 def test():
     filepath2 = "testcsv\\tb_lobby_stats_player.csv"
     filepath3 = "testjson\\banksdata.json"
+
     df2 = DataFrame(filepath3)
-    df2.removeFormatting()
+    print(f"ideal sample size: {df2.generate_sample_size()}")
+    print(f"Df checks sample size: {df2.check_df_size(100000)}")
+
+    """df2.removeFormatting()
     df2.removeDuplicates()
     for col in df2.get_columns_missing_values():
         df2.fill_column_missing_values(col, method="median")
 
     df2.categorical_to_numeric()
-    df2.get_data_report()
+    df2.get_data_report()"""
 
 if __name__ == "__main__":
     test()

@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 #Misc
-*.json
+categoricalFeaturesConversion.json
 *.xlsx
 
 # Data Files
