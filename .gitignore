@@ -6,8 +6,16 @@ __pycache__/
 # C extensions
 *.so
 
+#Misc
 testcsv/
 testjson/
+categoricalFeaturesConversion.json
+outliersDetection.json
+*.xlsx
+correlation.csv
+cleanDF.csv
+
+# Data Files
 
 # Distribution / packaging
 .Python

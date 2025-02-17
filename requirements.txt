@@ -1,0 +1,14 @@
+pandas
+numpy
+scikit-learn
+fastapi
+streamlit
+dash
+matplotlib
+seaborn
+plotly
+openpyxl
+psycopg2
+pymongo
+mysql-connector-python
+math
