@@ -7,6 +7,8 @@ __pycache__/
 *.so
 
 #Misc
+testcsv/
+testjson/
 categoricalFeaturesConversion.json
 outliersDetection.json
 *.xlsx
@@ -14,8 +16,6 @@ correlation.csv
 cleanDF.csv
 
 # Data Files
-testcsv/
-testjson/
 
 # Distribution / packaging
 .Python
