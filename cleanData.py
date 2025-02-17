@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression, LinearRegression
 import math
+from dateutil.parser import parse
 
 class DataFrame:
     def __init__(self, filepath: str = None, df: pd.DataFrame = None):
@@ -116,36 +117,46 @@ class DataFrame:
         return self.get_info(), self.get_missing_value(), self.get_amount_missing_values(), self.get_duplicates(), self.get_amount_duplicates()
 
     def get_correlation(self):
-        return self.df.corr()
-    
-    def get_features_datatypes(self):
-        return self.df.dtypes
-    
-    def removeFormatting(self):
         """
-        Remove formatting from the DataFrame columns.
+        Writes the correlation between columns in the DataFrame to a csv file.
 
-        This function will:
-
-        - Convert all string values to lower case
-        - Remove all spaces from string values
-        - If the column contains no letters, convert it to a float and remove all commas (assuming it is a number)
-
-        Parameters
-        ----------
+        The correlation between columns in the DataFrame is computed using the corr() method.
+        The result is then written to a csv file named "correlation.csv".
 
         Returns
         -------
         None
         """
-        for col in self.df.columns:                
+        
+        return self.df.corr().to_csv("correlation.csv")
+    
+    def get_features_datatypes(self):
+        return self.df.dtypes
+    
+    def is_DateTime(self, column):
+        try:
+            parse(self.df[column][0])
+            return True
+        except ValueError:
+            return False
+    
+    def removeFormatting(self):
+        for col in self.df.columns:
             if self.df[col].dtype == 'object':
-                self.df[col] = self.df[col].str.lower()
-                self.df[col] = self.df[col].str.replace(" ", "")
+                #Date and Time
+                if self.is_DateTime(col):
+                    self.df[col] = self.df[col].astype('datetime64[ns]')
                 
-                if not self.df[col].str.contains('[a-zA-Z]').any():
+                #Money
+                elif not self.df[col].str.contains('[a-zA-Z]').any():
                     self.df[col] = self.df[col].str.replace(',', '').astype(float)
 
+                else:
+                    #General Strings
+                    self.df[col] = self.df[col].str.lower()
+                    self.df[col] = self.df[col].str.replace(" ", "")
+
+            
             
     
     def categorical_to_numeric(self):
@@ -243,6 +254,10 @@ class DataFrame:
         int
             The ideal sample size.
         """
+        if population <= 0 or (confidence_level <= 0 or confidence_level >= 1) or (margin_of_error <= 0 or margin_of_error >= 1):
+            raise ValueError("All inputs must be greater than 0")
+        
+
         confidence_level =  1-(1-confidence_level)/2
         with open("randomSample.json", "r") as f:
             data = json.load(f)
@@ -305,17 +320,17 @@ def test():
     filepath2 = "testcsv\\tb_lobby_stats_player.csv"
     filepath3 = "testjson\\banksdata.json"
 
-    df2 = DataFrame(filepath3)
-    print(f"ideal sample size: {df2.generate_sample_size()}")
-    print(f"Df checks sample size: {df2.check_df_size(100000)}")
-
-    """df2.removeFormatting()
+    df2 = DataFrame(filepath2)
+    df2.get_data_report()
+    df2.removeFormatting()
     df2.removeDuplicates()
     for col in df2.get_columns_missing_values():
         df2.fill_column_missing_values(col, method="median")
 
     df2.categorical_to_numeric()
-    df2.get_data_report()"""
+    df2.get_data_report()
+
+    print(df2.get_correlation())
 
 if __name__ == "__main__":
     test()

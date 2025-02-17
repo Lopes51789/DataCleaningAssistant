@@ -9,6 +9,7 @@ __pycache__/
 #Misc
 categoricalFeaturesConversion.json
 *.xlsx
+correlation.csv
 
 # Data Files
 testcsv/
