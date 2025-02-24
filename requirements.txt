@@ -11,4 +11,3 @@ openpyxl
 psycopg2
 pymongo
 mysql-connector-python
-math
