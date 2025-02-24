@@ -133,7 +133,7 @@ class DataFrame:
     def get_features_datatypes(self):
         return self.df.dtypes
     
-    def is_DateTime(self, column):
+    def is_datetime(self, column):
         """
         Checks if the first element in a column is a date or datetime format.
 
@@ -153,7 +153,7 @@ class DataFrame:
         except ValueError:
             return False
     
-    def removeFormatting(self):
+    def remove_formatting(self):
         """
         Removes formatting from the DataFrame.
 
@@ -174,7 +174,7 @@ class DataFrame:
         for col in self.df.columns:
             if self.df[col].dtype == 'object':
                 #Date and Time
-                if self.is_DateTime(col):
+                if self.is_datetime(col):
                     self.df[col] = self.df[col].astype('datetime64[ns]')
                 
                 #Money
@@ -217,7 +217,7 @@ class DataFrame:
                 integer_values = [int(label) for label in encoded_values]
                 categorical_dict[col] = dict(zip(unique_values, integer_values))
 
-                #transform categorical features into inetegers using label encoding
+                #transform categorical features into integers using label encoding
                 self.df[col] = labelencoder.fit_transform(self.df[col])
 
             elif self.df[col].dtype == 'bool':
@@ -259,10 +259,10 @@ class DataFrame:
         elif method == "median" and self.df[column].dtype != 'object':
             self.df[column] = self.df[column].fillna(self.df[column].median())
 
-    def removeDuplicates(self):
+    def remove_duplicates(self):
         self.df.drop_duplicates(inplace=True)
 
-    def removeNaN(self):
+    def remove_NaN(self):
         self.df.dropna(inplace=True)
 
     
@@ -351,18 +351,39 @@ class DataFrame:
             json.dump(outliers, f, indent=4)
 
         return outliers
+    
+    def handle_outliers(self, json_file="outliersDetection.json", method="median"):
+        with open(json_file, "r") as f:
+            outliers = json.load(f)
+
+        for row in outliers:
+            for col, value in outliers[row]:
+                if method == "median":
+                    self.df.at[int(row), col] = np.median(self.df[col])
+                    print(f"Replaced {value} with {np.median(self.df[col])}")
+                elif method == "mean":
+                    self.df.at[int(row), col] = np.mean(self.df[col])
+                    print(f"Replaced {value} with {np.mean(self.df[col])}")
+                elif method == "mode":
+                    self.df.at[int(row), col] = np.mode(self.df[col])
+                    print(f"Replaced {value} with {np.mode(self.df[col])}")
+                elif method == "remove":
+                    self.df = self.df[self.df[col] != value]    
+                    print(f"Removed {value}")
+
+        return self.df
                 
 
-    def getSample(self):
+    def get_sample(self):
         return self.df.sample()
 
-    def getHead(self, n = 5):
+    def get_head(self, n = 5):
         return self.df.head(n)
 
-    def toCsv(self, filename):
+    def to_csv(self, filename):
         return self.df.to_csv(filename)
     
-    def to_Xlsx(self, filename):
+    def to_xlsx(self, filename):
         return self.df.to_excel(filename)
 
 
@@ -370,17 +391,17 @@ def test():
     filepath2 = "testcsv\\tb_lobby_stats_player.csv"
     filepath3 = "testjson\\banksdata.json"
 
-    df2 = DataFrame(filepath2)
+    df2 = DataFrame(filepath3)
     #df2.get_data_report()
-    df2.removeFormatting()
-    df2.removeDuplicates()
+    df2.remove_formatting()
+    df2.remove_duplicates()
     for col in df2.get_columns_missing_values():
         df2.fill_column_missing_values(col, method="median")
     df2.categorical_to_numeric()
     df2.detect_outliers()
+    df2.handle_outliers(method="median")
 
-
-    df2.toCsv(f"cleanDF.csv")
+    df2.to_csv("cleanDF.csv")
     #df2.get_data_report()
 
     #print(df2.get_correlation())
