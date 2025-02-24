@@ -134,6 +134,19 @@ class DataFrame:
         return self.df.dtypes
     
     def is_DateTime(self, column):
+        """
+        Checks if the first element in a column is a date or datetime format.
+
+        Parameters
+        ----------
+        column : str
+            The name of the column to be checked.
+
+        Returns
+        -------
+        bool
+            True if the first element is a date or datetime format, False otherwise.
+        """
         try:
             parse(self.df[column][0])
             return True
@@ -141,6 +154,23 @@ class DataFrame:
             return False
     
     def removeFormatting(self):
+        """
+        Removes formatting from the DataFrame.
+
+        For each column in the DataFrame, the method checks the type of the column. If the column is of type 'object', the method applies the following formatting rules:
+
+        - If the column is a datetime, it is converted to a datetime64[ns] type.
+        - If the column contains numerical values separated by commas, the commas are removed and the column is converted to a float type.
+        - For all other columns, the column is converted to lower case and all spaces are removed.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         for col in self.df.columns:
             if self.df[col].dtype == 'object':
                 #Date and Time
@@ -268,9 +298,44 @@ class DataFrame:
         return math.ceil(equation)
         
     def check_df_size(self, population = 100, confidence_level=0.95, margin_of_error=0.05) -> bool:
+        """
+        Checks if the DataFrame has a sufficient size based on Simple Random Sampling.
+
+        Parameters
+        ----------
+        population : float, optional
+            proportion of the population with the characteristic of interest. The default is 100.
+        confidence_level : float, optional
+            The desired confidence level. The default is 0.95.
+        margin_of_error : float, optional
+            The desired margin of error. The default is 0.05.
+        
+        Returns
+        -------
+        bool
+            True if the DataFrame size is sufficient, False otherwise.
+        """
         return self.generate_sample_size(population, confidence_level, margin_of_error) < self.df.shape[0]
     
     def detect_outliers(self):
+        """
+        Detects outliers in numerical columns of the DataFrame using the Z-score method.
+
+        Outliers are identified as values with a Z-score greater than 3.
+        The function computes the mean and standard deviation for each numeric column,
+        calculates the Z-score for each value, and flags outliers based on the threshold.
+        Detected outliers are stored in a dictionary with row indices as keys and a list
+        of tuples indicating the column name and outlier value.
+
+        The outliers' information is saved to a JSON file named "outliersDetection.json".
+
+        Returns
+        -------
+        dict
+            A dictionary containing indices as keys and lists of tuples with column names
+            and outlier values as values.
+        """
+
         outliers = {}
         for col in self.df.columns:
             if self.df[col].dtype in ['int64', 'int32', 'float64', 'float32']:
