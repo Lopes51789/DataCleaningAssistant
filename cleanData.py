@@ -353,6 +353,22 @@ class DataFrame:
         return outliers
     
     def handle_outliers(self, json_file="outliersDetection.json", method="median"):
+        """
+        Handles outliers in the DataFrame based on the specified method.
+
+        Parameters
+        ----------
+        json_file : str, optional
+            The path to the JSON file containing the outliers information.
+            The default is "outliersDetection.json".
+        method : str, optional
+            The method to use for handling outliers ('median', 'mean', 'mode', 'remove').
+            The default is 'median'.
+
+        Returns
+        ------- 
+        None
+        """
         with open(json_file, "r") as f:
             outliers = json.load(f)
 
@@ -385,26 +401,3 @@ class DataFrame:
     
     def to_xlsx(self, filename):
         return self.df.to_excel(filename)
-
-
-def test():
-    filepath2 = "testcsv\\tb_lobby_stats_player.csv"
-    filepath3 = "testjson\\banksdata.json"
-
-    df2 = DataFrame(filepath3)
-    #df2.get_data_report()
-    df2.remove_formatting()
-    df2.remove_duplicates()
-    for col in df2.get_columns_missing_values():
-        df2.fill_column_missing_values(col, method="median")
-    df2.categorical_to_numeric()
-    df2.detect_outliers()
-    df2.handle_outliers(method="median")
-
-    df2.to_csv("cleanDF.csv")
-    #df2.get_data_report()
-
-    #print(df2.get_correlation())
-
-if __name__ == "__main__":
-    test()
