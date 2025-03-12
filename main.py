@@ -8,7 +8,7 @@ class DataCleaningAssistant:
     def __init__(self, root):
         self.root = root
         self.root.title("Data Cleaning Assistant")
-        self.root.geometry("500x700")
+        self.root.geometry("700x700")
         self.root.configure(bg="white")
         
         self.setup_ui()
@@ -81,11 +81,13 @@ class DataCleaningAssistant:
         switch3.grid(row=6, column=1, rowspan=2, padx=(50, 0), sticky="e")
         
         # Preview area (gray box)
-        preview_frame = tk.Frame(self.root, bg="#ECECEC", height=250)
-        preview_frame.pack(fill="x", padx=50, pady=30)
+        self.preview_frame = tk.Frame(self.root, bg="#ECECEC", height=250)
+        self.preview_frame.pack(fill="x", padx=50, pady=30)
         
-        preview_placeholder = tk.Label(preview_frame, text="Preview", fg="#AAAAAA", bg="#ECECEC")
-        preview_placeholder.pack(expand=True, fill="both", pady=115)
+        self.preview_label = tk.Label(self.preview_frame, text="No file selected", 
+                                    fg="#AAAAAA", bg="#ECECEC",
+                                    font=("Arial", 10))
+        self.preview_label.pack(expand=True, fill="both", pady=115)
         
         # Action button
         action_frame = tk.Frame(self.root, bg="white", pady=20)
@@ -133,13 +135,18 @@ class DataCleaningAssistant:
     def upload_file(self):
         filename = filedialog.askopenfilename(
             title="Select a file",
-            filetypes=(("CSV files", "*.csv"), 
+            filetypes=(("CSV files", "*.csv"),
+                       ("JSON files", "*.json"),
+                       ("SQL files", "*.sql"), 
                       ("Excel files", "*.xlsx"), 
                       ("All files", "*.*"))
         )
         if filename:
+            df = cd.DataFrame(filename)
+            self.preview_label = ImageTk.PhotoImage(Image.open(df.head_image()))
             print(f"File selected: {filename}")
             # Here you would add code to process the uploaded file
+            
 
 if __name__ == "__main__":
     root = tk.Tk()

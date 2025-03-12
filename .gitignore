@@ -14,6 +14,7 @@ outliersDetection.json
 *.xlsx
 correlation.csv
 cleanDF.csv
+head.*
 
 # Data Files
 

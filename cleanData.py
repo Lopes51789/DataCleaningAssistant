@@ -2,6 +2,7 @@ import json
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split
@@ -236,20 +237,22 @@ class DataFrame:
     
     def fill_column_missing_values(self, column, method="mean"):
         """
-        Fills missing values in a specified column using a selected method.
+        Fills missing values in a specified column of the DataFrame using the specified method.
 
         Parameters
         ----------
         column : str
-            The name of the column in which missing values are to be filled.
+            The name of the column in which to fill missing values.
         method : str, optional
-            The method to use for filling missing values ('mean' or 'median').
-            The default is 'mean'.
+            The method to use for filling missing values. Options are:
+            'mean' - fills with the mean value of the column (default).
+            'median' - fills with the median value of the column.
+            'fill' - fills with the string "NA".
+            'zero' - fills with 0.
 
-        Notes
-        -----
-        This function only fills missing values for columns with numeric data types.
-        If the column is of object type, no action is taken.
+        Returns
+        -------
+        None
         """
 
         if self.df[column].dtype == 'object':
@@ -258,6 +261,10 @@ class DataFrame:
             self.df[column] = self.df[column].fillna(self.df[column].mean())
         elif method == "median" and self.df[column].dtype != 'object':
             self.df[column] = self.df[column].fillna(self.df[column].median())
+        elif method == "fill" and self.df[column].dtype != 'object':
+            self.df[column] = self.df[column].fillna("NA")
+        elif method == "zero" and self.df[column].dtype != 'object':
+            self.df[column] = self.df[column].fillna(0)
 
     def remove_duplicates(self):
         self.df.drop_duplicates(inplace=True)
@@ -401,3 +408,12 @@ class DataFrame:
     
     def to_xlsx(self, filename):
         return self.df.to_excel(filename)
+    
+    def head_image(self):
+        fig, ax = plt.subplots(figsize=(12, 4))
+        ax.axis('tight')
+        ax.axis('off')
+        ax.table(cellText=self.df.head().values, colLabels=self.df.head().columns, loc="center")
+        filename = "head.jpeg"
+        fig.savefig(filename, dpi=300, bbox_inches='tight')
+        return filename
